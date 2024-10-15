@@ -1,5 +1,10 @@
 
+using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using Talabat.APIS.Errors;
+using Talabat.APIS.Extenstions;
+using Talabat.APIS.Helpers;
+using Talabat.APIS.MiddleWare;
 using Talabat.Core_DomainLayer_.Enitities_Models_;
 using Talabat.Core_DomainLayer_.Repositories.Contract;
 using Talabat.Repository;
@@ -15,6 +20,7 @@ namespace Talabat.APIS
 
 			// Add services to the container.
 
+			#region Dependancy injection for controller
 			builder.Services.AddControllers();
 			// Learn more about configuring Swagger/OpenAPI at https://aka.ms/aspnetcore/swashbuckle
 			builder.Services.AddEndpointsApiExplorer();
@@ -27,12 +33,8 @@ namespace Talabat.APIS
 				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 			});
 
-			#region Dependancy injection for controller
-			//builder.Services.AddScoped<IGenericRepository<Product>, GenericRepository<Product>>();
-			//builder.Services.AddScoped<IGenericRepository<ProductBrand>, GenericRepository<ProductBrand>>();
-			//builder.Services.AddScoped<IGenericRepository<ProductCategory>, GenericRepository<ProductCategory>>();
-			//OR
-			builder.Services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+			//ApplicationServicesExtenstions.AddApplicationServices(builder.Services);
+			builder.Services.AddApplicationServices(); //Extenstion method
 			#endregion
 
 			var app = builder.Build();
@@ -70,19 +72,24 @@ namespace Talabat.APIS
 				logger.LogError(ex, "An Error occured during Migration");
 			}
 
+			#region MiddleWare
+
 			// Configure the HTTP request pipeline(Middle Ware).
+			app.UseMiddleware<ExceptionMiddleWare>();
 			if (app.Environment.IsDevelopment())
 			{
-				app.UseSwagger();
-				app.UseSwaggerUI();
+				app.UseSwaggerMiddleWare();
 			}
 
+			//redirect to endpoint named /errors when page not found
+			app.UseStatusCodePagesWithReExecute("/Errors/{0}"); 
 			app.UseHttpsRedirection();
 
 			app.UseAuthorization();
-
+			app.UseStaticFiles();
 
 			app.MapControllers();
+			#endregion
 
 			app.Run();
 		}
