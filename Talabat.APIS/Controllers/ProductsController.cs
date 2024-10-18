@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Http;
 using Microsoft.AspNetCore.Mvc;
 using Talabat.APIS.DTOs;
 using Talabat.APIS.Errors;
+using Talabat.APIS.Helpers;
 using Talabat.Core_DomainLayer_.Enitities_Models_;
 using Talabat.Core_DomainLayer_.Repositories.Contract;
 using Talabat.Core_DomainLayer_.Specifications.ProductSpacification;
@@ -39,16 +40,20 @@ namespace Talabat.APIS.Controllers
   //          return Ok(products); //200
 		//}
 
-		public async Task<ActionResult<IEnumerable<Product>>> GetProducts()
+		public async Task<ActionResult<IReadOnlyList<ProductDto>>> GetProducts([FromQuery]ProductSpecificationParams specificationParams)
 		{
-			var specification = new ProductWithBrandAndCategorySpecifications();
+			var specification = new ProductWithBrandAndCategorySpecifications(specificationParams);
 			var products = await _productRepository.GetAllWithSpecificationAsync(specification);
-			var mapped = _mapper.Map<IEnumerable<Product>, IEnumerable<ProductDto>>(products);
+			var mappedData = _mapper.Map<IReadOnlyList<Product>, IReadOnlyList<ProductDto>>(products);
+
+			var countSpec = new ProductsWithFilterationForCountSpecification(specificationParams);
+			var count = await _productRepository.GetCountAsync(specification);
+
             if (products == null)
             {
 				return NotFound(new ApiResponse(404));
             }
-            return Ok(mapped); //200
+			return Ok(new Pagination<ProductDto>(specificationParams.PageSize, specificationParams.PageIndex, count, mappedData)); //200
 		}
 
 		//to show the display of ok and error in swagger to front end 
@@ -65,7 +70,7 @@ namespace Talabat.APIS.Controllers
 		//	return Ok(product);
 		//}
 
-		public async Task<ActionResult<Product>> GetProduct(int id)
+		public async Task<ActionResult<ProductDto>> GetProduct(int id)
 		{
 			var specification = new ProductWithBrandAndCategorySpecifications(id);
 			var products = await _productRepository.GetWithSpecificationAsync(specification);
