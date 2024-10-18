@@ -12,8 +12,15 @@ namespace Talabat.Core_DomainLayer_.Specifications
 	{
 		public Expression<Func<T, bool>> Critria { get; set; }
         public List<Expression<Func<T, object>>> Includes { get; set; } = new List<Expression<Func<T, object>>>();
+		public Expression<Func<T, object>> OrderBy { get; set; } //null
+		public Expression<Func<T, object>> OrderByDesc { get; set; } //null
+		public Expression<Func<T, object>> ThenBy { get; set; } //null
+		public Expression<Func<T, object>> ThenByDesc { get; set; }	//null
+		public int Take { get; set; } //0
+		public int Skip { get; set; } //0
+		public bool IsPaginationEnabled { get; set; } = false;
 
-        public BaseSpecification()
+		public BaseSpecification()
         {
             // critria = null
         }
@@ -21,5 +28,27 @@ namespace Talabat.Core_DomainLayer_.Specifications
         {
             Critria = critriaExpression;
         }
-    }
+        public void AddOrderBy(Expression<Func<T,object>> OrderByExpression) //just setter for orderBy
+        {
+            OrderBy = OrderByExpression;
+        }
+		public void AddOrderByDesc(Expression<Func<T, object>> OrderByExpression) //just setter for orderByDesc
+		{
+			OrderByDesc = OrderByExpression;
+		}
+		public void AddThenBy(Expression<Func<T, object>> OrderByExpression) //just setter for ThenBy
+		{
+			ThenBy = OrderByExpression;
+		}
+		public void AddThenByDesc(Expression<Func<T, object>> OrderByExpression) //just setter for ThenByDesc
+		{
+			ThenByDesc = OrderByExpression;
+		}
+		public void ApplyPagination(int skip ,int take)
+		{
+			IsPaginationEnabled = true;
+			Skip = skip;
+			Take = take;
+		}
+	}
 }
