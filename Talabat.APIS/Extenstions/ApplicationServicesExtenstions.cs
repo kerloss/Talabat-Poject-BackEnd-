@@ -2,12 +2,12 @@
 using Talabat.APIS.Errors;
 using Talabat.APIS.Helpers;
 using Talabat.Core_DomainLayer_.Repositories.Contract;
-using Talabat.Repository;
+using Talabat.Repository.Repository.Contract;
 
 namespace Talabat.APIS.Extenstions
 {
-	//to make class as extenstion method we need to make it static class and put this
-	public static class ApplicationServicesExtenstions
+    //to make class as extenstion method we need to make it static class and put this
+    public static class ApplicationServicesExtenstions
 	{
 		//services carry => builder.Services
 		public static IServiceCollection AddApplicationServices(this IServiceCollection services)
@@ -34,6 +34,7 @@ namespace Talabat.APIS.Extenstions
 					return new BadRequestObjectResult(response);
 				};
 			});
+			services.AddScoped(typeof(IBasketRepository), typeof(BasketRepository));
 			return services;
 		}
 

@@ -1,14 +1,18 @@
 
+using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.EntityFrameworkCore;
+using StackExchange.Redis;
 using Talabat.APIS.Errors;
 using Talabat.APIS.Extenstions;
 using Talabat.APIS.Helpers;
 using Talabat.APIS.MiddleWare;
 using Talabat.Core_DomainLayer_.Enitities_Models_;
+using Talabat.Core_DomainLayer_.Enitities_Models_.Identity;
 using Talabat.Core_DomainLayer_.Repositories.Contract;
 using Talabat.Repository;
 using Talabat.Repository.Data;
+using Talabat.Repository.Data.Identity;
 
 namespace Talabat.APIS
 {
@@ -32,9 +36,23 @@ namespace Talabat.APIS
 			{
 				options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection"));
 			});
+			builder.Services.AddDbContext<AppIdentityDbContext>(options =>
+			{
+				options.UseSqlServer(builder.Configuration.GetConnectionString("IdentityConnection"));
+			});
+			builder.Services.AddSingleton<IConnectionMultiplexer>((serviceProvider) =>
+			{
+				var connection = builder.Configuration.GetConnectionString("Redis");
+				return ConnectionMultiplexer.Connect(connection);
+			});
 
 			//ApplicationServicesExtenstions.AddApplicationServices(builder.Services);
 			builder.Services.AddApplicationServices(); //Extenstion method
+			builder.Services.AddIdentity<AppUser, IdentityRole>(options =>
+			{
+				//options.Password.RequiredUniqueChars = 2;
+				//options.Password.RequireDigit = true;
+			}).AddEntityFrameworkStores<AppIdentityDbContext>();
 			#endregion
 
 			var app = builder.Build();
@@ -58,13 +76,19 @@ namespace Talabat.APIS
 
 			using var scope = app.Services.CreateScope(); //Add scope
 			var service = scope.ServiceProvider;
-			var _dbContext = service.GetRequiredService<StoreContext>();
+
+			var _dbContext = service.GetRequiredService<StoreContext>(); //Explicitly
+			var _identityDbContext = service.GetRequiredService<AppIdentityDbContext>();
+			var _userManager = service.GetRequiredService<UserManager<AppUser>>();
 
 			var loggerFactory = service.GetRequiredService<ILoggerFactory>();
 			try
 			{
 				await _dbContext.Database.MigrateAsync(); //Update DataBase
 				await StoreContextSeeding.SeedAsync(_dbContext); //Data Seeding
+				await _identityDbContext.Database.MigrateAsync(); //Update Identity DataBase
+				await AppIdentityDbContextSeeding.SeedUserAsync(_userManager); //Data Seeding
+
 			}
 			catch (Exception ex)
 			{
