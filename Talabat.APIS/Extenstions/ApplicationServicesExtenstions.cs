@@ -1,8 +1,12 @@
 ﻿using Microsoft.AspNetCore.Mvc;
 using Talabat.APIS.Errors;
 using Talabat.APIS.Helpers;
+using Talabat.Core_DomainLayer_;
 using Talabat.Core_DomainLayer_.Repositories.Contract;
+using Talabat.Core_DomainLayer_.Services.Contract;
+using Talabat.Repository;
 using Talabat.Repository.Repository.Contract;
+using Talabat.Service;
 
 namespace Talabat.APIS.Extenstions
 {
@@ -16,7 +20,9 @@ namespace Talabat.APIS.Extenstions
 			//builder.Services.AddScoped<IGenericRepository<ProductBrand>, GenericRepository<ProductBrand>>();
 			//builder.Services.AddScoped<IGenericRepository<ProductCategory>, GenericRepository<ProductCategory>>();
 			//OR
-			services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
+			services.AddScoped(typeof(IOrderService), typeof(OrderService));
+			services.AddScoped(typeof(IUnitOfWork), typeof(UnitOfWork));
+			//services.AddScoped(typeof(IGenericRepository<>), typeof(GenericRepository<>));
 			services.AddAutoMapper(typeof(MappingProfile));
 			services.Configure<ApiBehaviorOptions>(options =>
 			{

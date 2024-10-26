@@ -29,7 +29,7 @@ namespace Talabat.Repository.Repository.Contract
             return await _dbContext.Set<T>().ToListAsync();
         } //old
 
-        public async Task<T> GetAsync(int id)
+        public async Task<T?> GetAsync(int id)
         {
             if (typeof(T) == typeof(Product))
             {
@@ -44,7 +44,7 @@ namespace Talabat.Repository.Repository.Contract
             //OR
             //return await ApplySpecification(specifications).ToListAsync();
         }
-        public async Task<T> GetWithSpecificationAsync(ISpecifications<T> specifications)
+        public async Task<T?> GetWithSpecificationAsync(ISpecifications<T> specifications)
         {
             return await ApplySpecification(specifications)/*SpecificationEvaluator<T>.GetQuery(_dbContext.Set<T>(), specifications)*/.FirstOrDefaultAsync();
         }
@@ -58,5 +58,20 @@ namespace Talabat.Repository.Repository.Contract
         {
             return SpecificationEvaluator<T>.GetQuery(_dbContext.Set<T>(), specifications);
         }
-    }
+
+		public async Task AddAsync(T entity)
+		{
+			await _dbContext.AddAsync(entity);
+		}
+
+		public void UpdateAsync(T entity)
+		{
+			_dbContext.Update(entity);
+		}
+
+		public void DeleteAsync(T entity)
+		{
+			_dbContext.Remove(entity);
+		}
+	}
 }

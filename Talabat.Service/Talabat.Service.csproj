@@ -6,4 +6,8 @@
     <Nullable>enable</Nullable>
   </PropertyGroup>
 
+  <ItemGroup>
+    <ProjectReference Include="..\Talabat.Core(DomainLayer)\Talabat.Core(DomainLayer).csproj" />
+  </ItemGroup>
+
 </Project>
