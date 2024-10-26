@@ -17,7 +17,9 @@
   </ItemGroup>
 
   <ItemGroup>
+    <ProjectReference Include="..\Talabat.Core(DomainLayer)\Talabat.Core(DomainLayer).csproj" />
     <ProjectReference Include="..\Talabat.Repository\Talabat.Repository.csproj" />
+    <ProjectReference Include="..\Talabat.Service\Talabat.Service.csproj" />
   </ItemGroup>
 
 </Project>
